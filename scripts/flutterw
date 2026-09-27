@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+PROJECT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+if [ -n "${FLUTTER_SDK:-}" ] && [ -x "$FLUTTER_SDK/bin/flutter" ]; then
+  FLUTTER_BIN="$FLUTTER_SDK/bin/flutter"
+elif command -v flutter >/dev/null 2>&1; then
+  FLUTTER_BIN=$(command -v flutter)
+elif [ -x "$PROJECT/../../work/flutter-sdk/bin/flutter" ]; then
+  FLUTTER_BIN="$PROJECT/../../work/flutter-sdk/bin/flutter"
+else
+  echo "Install Flutter, add it to PATH, or set FLUTTER_SDK to its folder."
+  echo "See https://docs.flutter.dev/install"
+  exit 1
+fi
+cd "$PROJECT/mobile"
+exec "$FLUTTER_BIN" "$@"
