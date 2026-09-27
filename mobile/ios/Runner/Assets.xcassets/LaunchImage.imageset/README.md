@@ -1,3 +1,4 @@
-# Documentation placeholder
+# Launch image assets
 
-Paste your documentation for `mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md` here.
+Retained Flutter iOS launch resources. The current submission targets Android;
+the on-device inference bridge has not been implemented for iOS.

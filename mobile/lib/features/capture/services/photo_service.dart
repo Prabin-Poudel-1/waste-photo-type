@@ -8,20 +8,16 @@ import '../../analysis/models/detection_result.dart';
 
 abstract interface class PhotoService {
   Future<WastePhoto?> pick(ImageSource source);
-
   Future<WastePhoto?> recover();
 }
 
 class DevicePhotoService implements PhotoService {
   final ImagePicker picker;
-
   DevicePhotoService(this.picker);
-
   Future<WastePhoto> read(XFile file) async {
     if (await file.length() > AppConfig.maxImageBytes) {
       throw const AppFailure('Choose a photo under 10 MB.');
     }
-
     return WastePhoto(
       bytes: await file.readAsBytes(),
       name: file.name,
@@ -39,7 +35,6 @@ class DevicePhotoService implements PhotoService {
         imageQuality: 85,
         requestFullMetadata: false,
       );
-
       return file == null ? null : await read(file);
     } on PlatformException catch (e) {
       if (e.code.toLowerCase().contains('denied') ||
@@ -49,45 +44,34 @@ class DevicePhotoService implements PhotoService {
           permissionDenied: true,
         );
       }
-
       throw const AppFailure(
         'The camera or photo picker could not open. Try the gallery, or check device permissions.',
       );
     } on AppFailure {
       rethrow;
     } catch (_) {
-      throw const AppFailure(
-        'We could not load that photo. Please try again.',
-      );
+      throw const AppFailure('We could not load that photo. Please try again.');
     }
   }
 
   @override
   Future<WastePhoto?> recover() async {
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
-      return null;
-    }
-
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return null;
     try {
       final response = await picker.retrieveLostData();
-
       if (response.exception != null) {
         throw const AppFailure(
           'Your last photo could not be recovered. Please select it again.',
         );
       }
-
       if (response.files?.isNotEmpty == true) {
         return await read(response.files!.first);
       }
-
       return null;
     } on AppFailure {
       rethrow;
     } catch (_) {
-      throw const AppFailure(
-        'Please select your photo again to continue.',
-      );
+      throw const AppFailure('Please select your photo again to continue.');
     }
   }
-}// Placeholder: paste the contents of mobile/lib/features/capture/services/photo_service.dart from your app here.
+}

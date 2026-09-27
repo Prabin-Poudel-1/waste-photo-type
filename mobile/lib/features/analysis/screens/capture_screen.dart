@@ -1,4 +1,3 @@
-// Placeholder: paste the contents of mobile/lib/features/analysis/screens/capture_screen.dart from your app here.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,12 +9,10 @@ import '../controllers/analysis_controller.dart';
 
 class CaptureScreen extends ConsumerWidget {
   const CaptureScreen({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(analysisProvider);
     final controller = ref.read(analysisProvider.notifier);
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -25,21 +22,13 @@ class CaptureScreen extends ConsumerWidget {
         ),
         title: const Text(
           'Report waste',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
         ),
       ),
       body: SafeArea(
         child: PageShell(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(
-              24,
-              12,
-              24,
-              28,
-            ),
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
             children: [
               const StepHeader(0),
               const SizedBox(height: 26),
@@ -62,9 +51,7 @@ class CaptureScreen extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFFE9EEDF),
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: const Color(0xFFD0DBBF),
-                    ),
+                    border: Border.all(color: const Color(0xFFD0DBBF)),
                   ),
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -94,38 +81,24 @@ class CaptureScreen extends ConsumerWidget {
               FilledButton.icon(
                 onPressed: state.picking
                     ? null
-                    : () => controller.pick(
-                  ImageSource.camera,
-                ),
-                icon: const Icon(
-                  Icons.camera_alt_outlined,
-                ),
+                    : () => controller.pick(ImageSource.camera),
+                icon: const Icon(Icons.camera_alt_outlined),
                 label: Text(
-                  state.photo == null
-                      ? 'Take a photo'
-                      : 'Retake photo',
+                  state.photo == null ? 'Take a photo' : 'Retake photo',
                 ),
               ),
               const SizedBox(height: 10),
               OutlinedButton.icon(
                 onPressed: state.picking
                     ? null
-                    : () => controller.pick(
-                  ImageSource.gallery,
-                ),
-                icon: const Icon(
-                  Icons.photo_library_outlined,
-                ),
-                label: const Text(
-                  'Choose from gallery',
-                ),
+                    : () => controller.pick(ImageSource.gallery),
+                icon: const Icon(Icons.photo_library_outlined),
+                label: const Text('Choose from gallery'),
               ),
               if (state.picking)
                 const Padding(
                   padding: EdgeInsets.all(18),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  child: Center(child: CircularProgressIndicator()),
                 ),
               if (state.error != null)
                 Padding(
@@ -134,19 +107,13 @@ class CaptureScreen extends ConsumerWidget {
                     liveRegion: true,
                     child: Column(
                       children: [
-                        Notice(
-                          state.error!.message,
-                          warning: true,
-                        ),
+                        Notice(state.error!.message, warning: true),
                         if (state.error!.permissionDenied)
                           TextButton(
                             onPressed: () async {
-                              final opened =
-                              await openAppSettings();
-
+                              final opened = await openAppSettings();
                               if (!opened && context.mounted) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(
+                                ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
                                       'Open your device settings and enable camera or photo access for Chitwan Care.',
@@ -155,9 +122,7 @@ class CaptureScreen extends ConsumerWidget {
                                 );
                               }
                             },
-                            child: const Text(
-                              'Open device settings',
-                            ),
+                            child: const Text('Open device settings'),
                           ),
                       ],
                     ),
@@ -169,25 +134,17 @@ class CaptureScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 18),
               FilledButton.icon(
-                onPressed:
-                state.photo == null || state.picking
+                onPressed: state.photo == null || state.picking
                     ? null
                     : controller.analyze,
-                icon: const Icon(
-                  Icons.auto_awesome_outlined,
-                ),
-                label: const Text(
-                  'Analyze photo',
-                ),
+                icon: const Icon(Icons.auto_awesome_outlined),
+                label: const Text('Analyze photo'),
               ),
               const SizedBox(height: 12),
               const Text(
                 'JPEG or PNG · Up to 10 MB\nCamera and photo access are requested only when needed.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 11,
-                  height: 1.6,
-                ),
+                style: TextStyle(fontSize: 11, height: 1.6),
               ),
             ],
           ),

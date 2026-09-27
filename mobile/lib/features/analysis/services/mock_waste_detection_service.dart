@@ -1,28 +1,23 @@
-// Placeholder: paste the contents of mobile/lib/features/analysis/services/mock_waste_detection_service.dart from your app here.
 import '../../../core/errors/app_failure.dart';
 import '../models/detection_result.dart';
 import 'waste_detection_service.dart';
 
 class MockWasteDetectionService implements WasteDetectionService {
   final Duration delay;
-
   const MockWasteDetectionService({
     this.delay = const Duration(milliseconds: 1800),
   });
-
   @override
   Future<DetectionResult> analyze(
-      WastePhoto photo,
-      MockScenario scenario,
-      ) async {
+    WastePhoto photo,
+    MockScenario scenario,
+  ) async {
     await Future<void>.delayed(delay);
-
     if (scenario == MockScenario.error) {
       throw const AppFailure(
         'Simulated analysis outage. Your photo is still here. Choose another demo scenario and try again.',
       );
     }
-
     final detections = switch (scenario) {
       MockScenario.multiple => const [
         WasteDetection(
@@ -50,7 +45,6 @@ class MockWasteDetectionService implements WasteDetectionService {
       ],
       _ => <WasteDetection>[],
     };
-
     return DetectionResult(
       id: 'local-${DateTime.now().microsecondsSinceEpoch}',
       isMock: true,

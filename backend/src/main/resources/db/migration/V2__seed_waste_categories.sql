@@ -9,5 +9,4 @@ INSERT INTO waste_categories(code, name, description) VALUES
  ('hazardous','Hazardous Waste','Potentially hazardous material requiring assessment'),
  ('mixed','Mixed Waste','Mixed categories of waste'),
  ('other','Other','Waste outside the available categories');
-
 -- No invented municipal departments, users, credentials or assignments are seeded.

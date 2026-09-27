@@ -5,6 +5,8 @@ if [ -n "${FLUTTER_SDK:-}" ] && [ -x "$FLUTTER_SDK/bin/flutter" ]; then
   FLUTTER_BIN="$FLUTTER_SDK/bin/flutter"
 elif command -v flutter >/dev/null 2>&1; then
   FLUTTER_BIN=$(command -v flutter)
+elif [ -x "$HOME/Documents/Codex/2026-09-20/w/work/flutter-sdk/bin/flutter" ]; then
+  FLUTTER_BIN="$HOME/Documents/Codex/2026-09-20/w/work/flutter-sdk/bin/flutter"
 elif [ -x "$PROJECT/../../work/flutter-sdk/bin/flutter" ]; then
   FLUTTER_BIN="$PROJECT/../../work/flutter-sdk/bin/flutter"
 else

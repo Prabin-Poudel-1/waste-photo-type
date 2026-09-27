@@ -1,72 +1,66 @@
 package np.chitwancare.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import np.chitwancare.enums.ImageType;
+import jakarta.persistence.*;
+import java.util.*;
+import np.chitwancare.enums.*;
 
 @Entity
 @Table(name = "report_images")
 public class ReportImage extends BaseEntity {
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "report_id", nullable = false)
-    private WasteReport report;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "report_id", nullable = false)
+  private WasteReport report;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "image_type", length = 30, nullable = false)
-    private ImageType imageType;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "image_type", length = 30, nullable = false)
+  private ImageType imageType;
 
-    @Column(name = "storage_key", length = 500, nullable = false)
-    private String storageKey;
+  @Column(name = "storage_key", length = 500, nullable = false)
+  private String storageKey;
 
-    @Column(name = "original_filename", length = 255, nullable = false)
-    private String originalFilename;
+  @Column(name = "original_filename", length = 255, nullable = false)
+  private String originalFilename;
 
-    @Column(name = "content_type", length = 100, nullable = false)
-    private String contentType;
+  @Column(name = "content_type", length = 100, nullable = false)
+  private String contentType;
 
-    public WasteReport getReport() {
-        return report;
-    }
+  public WasteReport getReport() {
+    return report;
+  }
 
-    public void setReport(WasteReport value) {
-        this.report = value;
-    }
+  public void setReport(WasteReport value) {
+    this.report = value;
+  }
 
-    public ImageType getImageType() {
-        return imageType;
-    }
+  public ImageType getImageType() {
+    return imageType;
+  }
 
-    public void setImageType(ImageType value) {
-        this.imageType = value;
-    }
+  public void setImageType(ImageType value) {
+    this.imageType = value;
+  }
 
-    public String getStorageKey() {
-        return storageKey;
-    }
+  public String getStorageKey() {
+    return storageKey;
+  }
 
-    public void setStorageKey(String value) {
-        this.storageKey = value;
-    }
+  public void setStorageKey(String value) {
+    this.storageKey = value;
+  }
 
-    public String getOriginalFilename() {
-        return originalFilename;
-    }
+  public String getOriginalFilename() {
+    return originalFilename;
+  }
 
-    public void setOriginalFilename(String value) {
-        this.originalFilename = value;
-    }
+  public void setOriginalFilename(String value) {
+    this.originalFilename = value;
+  }
 
-    public String getContentType() {
-        return contentType;
-    }
+  public String getContentType() {
+    return contentType;
+  }
 
-    public void setContentType(String value) {
-        this.contentType = value;
-    }
-}// Placeholder: paste the contents of backend/src/main/java/np/chitwancare/entity/ReportImage.java from your app here.
+  public void setContentType(String value) {
+    this.contentType = value;
+  }
+}

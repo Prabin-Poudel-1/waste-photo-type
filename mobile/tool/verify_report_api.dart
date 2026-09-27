@@ -1,5 +1,5 @@
-// Writes one synthetic report. Run ONLY against the template/test backend/database.
-// dart run tool/verify_report_api.dart http://127.0.0.1:8082
+// Writes one synthetic report. Run ONLY against a dedicated test backend/database.
+// dart run tool/verify_report_api.dart http://127.0.0.1:18081
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -14,7 +14,6 @@ Future<void> main(List<String> args) async {
       'Provide the dedicated test backend URL (this writes a synthetic report).',
     );
   }
-
   final dio = Dio(
     BaseOptions(
       baseUrl: args.single,
@@ -22,29 +21,22 @@ Future<void> main(List<String> args) async {
       receiveTimeout: const Duration(seconds: 30),
     ),
   );
-
   try {
     final repository = HttpReportRepository(dio);
     final categories = await repository.categories();
     final spots = await repository.spots();
-
     const location = IncidentLocation(0.000123, 0.000234, 5);
     final spot = await repository.nearest(location);
-
-    if (spot == null || !spots.any((item) => item.id == spot.id)) {
+    if (spot == null || !spots.any((s) => s.id == spot.id)) {
       throw StateError(
         'Seed a clearly labelled test spot at 0,0 with radius 100 m in the test database first.',
       );
     }
-
     final photo = WastePhoto(
-      bytes: File(
-        'test/fixtures/synthetic-scene.png',
-      ).readAsBytesSync(),
+      bytes: File('test/fixtures/synthetic-scene.png').readAsBytesSync(),
       name: 'synthetic-scene.png',
       selectedAt: DateTime.now(),
     );
-
     final metadata = reportMetadata(
       location: location,
       detections: const [
@@ -64,55 +56,33 @@ Future<void> main(List<String> args) async {
       severity: 'MEDIUM',
       touristSpotId: spot.id,
     );
-
-    final created = await repository.submit(
-      metadata,
-      photo,
-          (_, _) {},
-    );
-
+    final created = await repository.submit(metadata, photo, (_, _) {});
     if (created.status != 'SUBMITTED' || created.images.length != 1) {
       throw StateError('Incomplete report');
     }
-
-    final detailResponse = await dio.get(
-      '/api/v1/reports/${created.id}',
-    );
-    final detail = detailResponse.data as Map;
-
+    final detail = (await dio.get('/api/v1/reports/${created.id}')).data as Map;
     if ((detail['detections'] as List).length != 2 ||
         (detail['statusHistory'] as List).length != 1 ||
         detail['latitude'] != .000123 ||
         detail['longitude'] != .000234 ||
         (detail['touristSpot'] as Map)['id'] != spot.id) {
-      throw StateError(
-        'Stored metadata differs from submitted metadata',
-      );
+      throw StateError('Stored metadata differs from submitted metadata');
     }
-
     final image = await dio.get<List<int>>(
       created.images.single['url'] as String,
       options: Options(responseType: ResponseType.bytes),
     );
-
     final bytes = image.data!;
-
     if (bytes.length != photo.bytes.length) {
       throw StateError('Image length differs');
     }
-
     for (var i = 0; i < bytes.length; i++) {
-      if (bytes[i] != photo.bytes[i]) {
-        throw StateError('Image differs');
-      }
+      if (bytes[i] != photo.bytes[i]) throw StateError('Image differs');
     }
-
     stdout.writeln(
-      'PASS: real multipart HTTP → report #${created.id}, '
-          'SUBMITTED, two detections, GPS, spot, original image '
-          'and byte-identical retrieval.',
+      'PASS: real multipart HTTP → report #${created.id}, SUBMITTED, two detections, GPS, spot, original image and byte-identical retrieval.',
     );
   } finally {
     dio.close();
   }
-}// Placeholder: paste the contents of mobile/tool/verify_report_api.dart from your app here.
+}

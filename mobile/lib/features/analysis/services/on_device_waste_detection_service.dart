@@ -1,4 +1,3 @@
-// Placeholder: paste the contents of mobile/lib/features/analysis/services/on_device_waste_detection_service.dart from your app here.
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -9,37 +8,26 @@ import 'yolo_processing.dart';
 
 class OnDeviceWasteDetectionService implements WasteDetectionService {
   static const channel = MethodChannel('np.chitwancare/waste_inference');
-
   bool _busy = false;
-
   @override
   Future<DetectionResult> analyze(
-      WastePhoto photo,
-      MockScenario scenario,
-      ) async {
+    WastePhoto photo,
+    MockScenario scenario,
+  ) async {
     if (_busy) {
       throw const AppFailure('Analysis already running.');
     }
-
     _busy = true;
-
     try {
       final prepared = await compute(preparePhoto, photo.bytes);
-
       final output = await channel.invokeMethod<Uint8List>(
         'infer',
         prepared.input,
       );
-
       if (output == null) {
         throw const FormatException('No model output');
       }
-
-      final detections = await compute(
-        _decode,
-        (output, prepared.letterbox),
-      );
-
+      final detections = await compute(_decode, (output, prepared.letterbox));
       return DetectionResult(
         id: 'device-${DateTime.now().microsecondsSinceEpoch}',
         isMock: false,
@@ -66,8 +54,6 @@ class OnDeviceWasteDetectionService implements WasteDetectionService {
     }
   }
 
-  static List<WasteDetection> _decode(
-      (Uint8List, Letterbox) data,
-      ) =>
+  static List<WasteDetection> _decode((Uint8List, Letterbox) data) =>
       decodeYolo(data.$1, data.$2);
 }

@@ -1,7 +1,7 @@
 class AppConfig {
   static const analysisMode = String.fromEnvironment(
     'ANALYSIS_MODE',
-    defaultValue: 'mock',
+    defaultValue: 'device',
   );
 
   static const apiBaseUrl = String.fromEnvironment(

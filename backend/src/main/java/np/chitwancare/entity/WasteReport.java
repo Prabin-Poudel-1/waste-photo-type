@@ -1,154 +1,141 @@
 package np.chitwancare.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import np.chitwancare.enums.ReportStatus;
-import np.chitwancare.enums.Severity;
+import java.util.*;
+import np.chitwancare.enums.*;
 
 @Entity
 @Table(name = "waste_reports")
 public class WasteReport extends MutableEntity {
-    @OneToMany(mappedBy = "report", cascade = CascadeType.PERSIST)
-    @OrderBy("id ASC")
-    private List<ReportImage> images = new ArrayList<>();
+  @OneToMany(mappedBy = "report", cascade = CascadeType.PERSIST)
+  @OrderBy("id ASC")
+  private List<ReportImage> images = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tourist_spot_id")
-    private TouristSpot touristSpot;
+  public List<ReportImage> getImages() {
+    return Collections.unmodifiableList(images);
+  }
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "reporter_id", nullable = true)
-    private AppUser reporter;
+  public void addImage(ReportImage image) {
+    image.setReport(this);
+    images.add(image);
+  }
 
-    @Column(name = "description", length = 2000, nullable = true)
-    private String description;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "tourist_spot_id")
+  private TouristSpot touristSpot;
 
-    @Column(nullable = false, precision = 9, scale = 6)
-    private BigDecimal latitude;
+  public TouristSpot getTouristSpot() {
+    return touristSpot;
+  }
 
-    @Column(nullable = false, precision = 9, scale = 6)
-    private BigDecimal longitude;
+  public void setTouristSpot(TouristSpot value) {
+    touristSpot = value;
+  }
 
-    @Column(name = "address", length = 500, nullable = true)
-    private String address;
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  @JoinColumn(name = "reporter_id", nullable = true)
+  private AppUser reporter;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "severity", length = 20, nullable = false)
-    private Severity severity;
+  @Column(name = "description", length = 2000, nullable = true)
+  private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "current_status", length = 30, nullable = false)
-    private ReportStatus currentStatus;
+  @Column(nullable = false, precision = 9, scale = 6)
+  private BigDecimal latitude;
 
-    @OneToMany(mappedBy = "report", cascade = CascadeType.PERSIST)
-    @OrderBy("id ASC")
-    private List<WasteDetection> detections = new ArrayList<>();
+  @Column(nullable = false, precision = 9, scale = 6)
+  private BigDecimal longitude;
 
-    @OneToMany(mappedBy = "report", cascade = CascadeType.PERSIST)
-    @OrderBy("createdAt ASC, id ASC")
-    private List<ReportStatusHistory> statusHistory = new ArrayList<>();
+  @Column(name = "address", length = 500, nullable = true)
+  private String address;
 
-    public List<ReportImage> getImages() {
-        return Collections.unmodifiableList(images);
-    }
+  @Enumerated(EnumType.STRING)
+  @Column(name = "severity", length = 20, nullable = false)
+  private Severity severity;
 
-    public void addImage(ReportImage image) {
-        image.setReport(this);
-        images.add(image);
-    }
+  @Enumerated(EnumType.STRING)
+  @Column(name = "current_status", length = 30, nullable = false)
+  private ReportStatus currentStatus;
 
-    public TouristSpot getTouristSpot() {
-        return touristSpot;
-    }
+  @OneToMany(mappedBy = "report", cascade = CascadeType.PERSIST)
+  @OrderBy("id ASC")
+  private List<WasteDetection> detections = new ArrayList<>();
 
-    public void setTouristSpot(TouristSpot value) {
-        touristSpot = value;
-    }
+  @OneToMany(mappedBy = "report", cascade = CascadeType.PERSIST)
+  @OrderBy("createdAt ASC, id ASC")
+  private List<ReportStatusHistory> statusHistory = new ArrayList<>();
 
-    public List<WasteDetection> getDetections() {
-        return Collections.unmodifiableList(detections);
-    }
+  public List<WasteDetection> getDetections() {
+    return Collections.unmodifiableList(detections);
+  }
 
-    public List<ReportStatusHistory> getStatusHistory() {
-        return Collections.unmodifiableList(statusHistory);
-    }
+  public List<ReportStatusHistory> getStatusHistory() {
+    return Collections.unmodifiableList(statusHistory);
+  }
 
-    public void addDetection(WasteDetection value) {
-        value.setReport(this);
-        detections.add(value);
-    }
+  public void addDetection(WasteDetection value) {
+    value.setReport(this);
+    detections.add(value);
+  }
 
-    public void addHistory(ReportStatusHistory value) {
-        value.setReport(this);
-        statusHistory.add(value);
-    }
+  public void addHistory(ReportStatusHistory value) {
+    value.setReport(this);
+    statusHistory.add(value);
+  }
 
-    public AppUser getReporter() {
-        return reporter;
-    }
+  public AppUser getReporter() {
+    return reporter;
+  }
 
-    public void setReporter(AppUser value) {
-        this.reporter = value;
-    }
+  public void setReporter(AppUser value) {
+    this.reporter = value;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setDescription(String value) {
-        this.description = value;
-    }
+  public void setDescription(String value) {
+    this.description = value;
+  }
 
-    public BigDecimal getLatitude() {
-        return latitude;
-    }
+  public BigDecimal getLatitude() {
+    return latitude;
+  }
 
-    public void setLatitude(BigDecimal value) {
-        this.latitude = value;
-    }
+  public void setLatitude(BigDecimal value) {
+    this.latitude = value;
+  }
 
-    public BigDecimal getLongitude() {
-        return longitude;
-    }
+  public BigDecimal getLongitude() {
+    return longitude;
+  }
 
-    public void setLongitude(BigDecimal value) {
-        this.longitude = value;
-    }
+  public void setLongitude(BigDecimal value) {
+    this.longitude = value;
+  }
 
-    public String getAddress() {
-        return address;
-    }
+  public String getAddress() {
+    return address;
+  }
 
-    public void setAddress(String value) {
-        this.address = value;
-    }
+  public void setAddress(String value) {
+    this.address = value;
+  }
 
-    public Severity getSeverity() {
-        return severity;
-    }
+  public Severity getSeverity() {
+    return severity;
+  }
 
-    public void setSeverity(Severity value) {
-        this.severity = value;
-    }
+  public void setSeverity(Severity value) {
+    this.severity = value;
+  }
 
-    public ReportStatus getCurrentStatus() {
-        return currentStatus;
-    }
+  public ReportStatus getCurrentStatus() {
+    return currentStatus;
+  }
 
-    public void setCurrentStatus(ReportStatus value) {
-        this.currentStatus = value;
-    }
-}// Placeholder: paste the contents of backend/src/main/java/np/chitwancare/entity/WasteReport.java from your app here.
+  public void setCurrentStatus(ReportStatus value) {
+    this.currentStatus = value;
+  }
+}

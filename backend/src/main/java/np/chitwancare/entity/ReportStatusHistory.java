@@ -1,62 +1,56 @@
 package np.chitwancare.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import np.chitwancare.enums.ReportStatus;
+import jakarta.persistence.*;
+import java.util.*;
+import np.chitwancare.enums.*;
 
 @Entity
 @Table(name = "report_status_history")
 public class ReportStatusHistory extends BaseEntity {
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "report_id", nullable = false)
-    private WasteReport report;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "report_id", nullable = false)
+  private WasteReport report;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 30, nullable = false)
-    private ReportStatus status;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", length = 30, nullable = false)
+  private ReportStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "changed_by_id", nullable = true)
-    private AppUser changedBy;
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  @JoinColumn(name = "changed_by_id", nullable = true)
+  private AppUser changedBy;
 
-    @Column(name = "note", length = 1000, nullable = true)
-    private String note;
+  @Column(name = "note", length = 1000, nullable = true)
+  private String note;
 
-    public WasteReport getReport() {
-        return report;
-    }
+  public WasteReport getReport() {
+    return report;
+  }
 
-    public void setReport(WasteReport value) {
-        this.report = value;
-    }
+  public void setReport(WasteReport value) {
+    this.report = value;
+  }
 
-    public ReportStatus getStatus() {
-        return status;
-    }
+  public ReportStatus getStatus() {
+    return status;
+  }
 
-    public void setStatus(ReportStatus value) {
-        this.status = value;
-    }
+  public void setStatus(ReportStatus value) {
+    this.status = value;
+  }
 
-    public AppUser getChangedBy() {
-        return changedBy;
-    }
+  public AppUser getChangedBy() {
+    return changedBy;
+  }
 
-    public void setChangedBy(AppUser value) {
-        this.changedBy = value;
-    }
+  public void setChangedBy(AppUser value) {
+    this.changedBy = value;
+  }
 
-    public String getNote() {
-        return note;
-    }
+  public String getNote() {
+    return note;
+  }
 
-    public void setNote(String value) {
-        this.note = value;
-    }
-}// Placeholder: paste the contents of backend/src/main/java/np/chitwancare/entity/ReportStatusHistory.java from your app here.
+  public void setNote(String value) {
+    this.note = value;
+  }
+}

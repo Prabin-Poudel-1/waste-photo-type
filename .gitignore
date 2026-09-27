@@ -8,3 +8,12 @@ backend/target/
 *.log
 uploads/
 backend/auth-local.properties
+*.apk
+*.aab
+*.zip
+*.dump
+*-data.sql
+*.jks
+*.keystore
+**/local.properties
+**/__pycache__/

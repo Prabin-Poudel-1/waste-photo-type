@@ -9,4 +9,4 @@ class RunnerTests: XCTestCase {
     // See https://developer.apple.com/documentation/xctest for more information about using XCTest.
   }
 
-}// Placeholder: paste the contents of mobile/ios/RunnerTests/RunnerTests.swift from your app here.
+}

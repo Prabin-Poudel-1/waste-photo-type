@@ -14,86 +14,41 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class StorageAndMatchingTest {
-    @TempDir Path temporary;
+  @TempDir Path temporary;
 
-    @Test
-    void opaqueKeysRejectTraversalAndAbsolutePaths() {
-        var storage =
-                new LocalImageStorage(
-                        temporary.toString());
-
-        for (String key :
-                List.of(
-                        "../secrets",
-                        "/etc/passwd",
-                        "photo.png",
-                        "..\\secrets")) {
-            assertThrows(
-                    java.io.IOException.class,
-                    () -> storage.open(key));
-
-            assertThrows(
-                    java.io.IOException.class,
-                    () -> storage.delete(key));
-        }
+  @Test
+  void opaqueKeysRejectTraversalAndAbsolutePaths() {
+    var storage = new LocalImageStorage(temporary.toString());
+    for (String key : List.of("../secrets", "/etc/passwd", "photo.png", "..\\secrets")) {
+      assertThrows(java.io.IOException.class, () -> storage.open(key));
+      assertThrows(java.io.IOException.class, () -> storage.delete(key));
     }
+  }
 
-    @Test
-    void distanceIsGeographicAndHandlesDateline() {
-        assertEquals(
-                0,
-                TouristSpotService.distance(
-                        0, 0, 0, 0),
-                .001);
+  @Test
+  void distanceIsGeographicAndHandlesDateline() {
+    assertEquals(0, TouristSpotService.distance(0, 0, 0, 0), .001);
+    assertEquals(111195, TouristSpotService.distance(0, 0, 0, 1), 2);
+    assertEquals(222390, TouristSpotService.distance(0, 179, 0, -179), 3);
+  }
 
-        assertEquals(
-                111195,
-                TouristSpotService.distance(
-                        0, 0, 0, 1),
-                2);
-
-        assertEquals(
-                222390,
-                TouristSpotService.distance(
-                        0, 179, 0, -179),
-                3);
-    }
-
-    @Test
-    void matchingRequiresRadiusAndChoosesClosestContainingSpot() {
-        var repository =
-                mock(TouristSpotRepository.class);
-
-        var near = new TouristSpot();
-        near.setName("Development near");
-        near.setLatitude(BigDecimal.ZERO);
-        near.setLongitude(BigDecimal.ZERO);
-        near.setRadiusMeters(100);
-
-        var far = new TouristSpot();
-        far.setName("Development far");
-        far.setLatitude(BigDecimal.ZERO);
-        far.setLongitude(
-                new BigDecimal("0.001"));
-        far.setRadiusMeters(1000);
-
-        when(
-                repository
-                        .findByActiveTrueOrderByNameAscIdAsc())
-                .thenReturn(List.of(far, near));
-
-        var service =
-                new TouristSpotService(repository);
-
-        assertEquals(
-                near.getName(),
-                service.nearest(0, .0001).name());
-
-        assertEquals(
-                far.getName(),
-                service.nearest(0, .005).name());
-
-        assertNull(
-                service.nearest(10, 10));
-    }
-}// Placeholder: paste the contents of backend/src/test/java/np/chitwancare/StorageAndMatchingTest.java from your app here.
+  @Test
+  void matchingRequiresRadiusAndChoosesClosestContainingSpot() {
+    var repo = mock(TouristSpotRepository.class);
+    var a = new TouristSpot();
+    a.setName("Development near");
+    a.setLatitude(BigDecimal.ZERO);
+    a.setLongitude(BigDecimal.ZERO);
+    a.setRadiusMeters(100);
+    var b = new TouristSpot();
+    b.setName("Development far");
+    b.setLatitude(BigDecimal.ZERO);
+    b.setLongitude(new BigDecimal("0.001"));
+    b.setRadiusMeters(1000);
+    when(repo.findByActiveTrueOrderByNameAscIdAsc()).thenReturn(List.of(b, a));
+    var service = new TouristSpotService(repo);
+    assertEquals(a.getName(), service.nearest(0, .0001).name());
+    assertEquals(b.getName(), service.nearest(0, .005).name());
+    assertNull(service.nearest(10, 10));
+  }
+}

@@ -1,11 +1,129 @@
-# Chitwan Care 
+# Chitwan Care — local Android submission
 
-This is a folder/file scaffold, not a working app yet. Paste your implementation into the placeholder files with the same names. Application source, tests, SQL migrations and custom scripts contain placeholders. Build configuration, dependency manifests/locks, Maven/Gradle wrappers, platform resources, images and the model asset are retained.
+Restored from the original Chitwan Care implementation into this independent template.
+The original project was not modified. This repository targets Android emulators and
+USB-connected Android phones, using Spring Boot and PostgreSQL on your laptop.
+The Android application ID is `np.chitwancare.template` (Chitwan Care Local), so
+installing it does not replace the original app or reuse its saved login.
 
-Start with `mobile/lib/` for Flutter and `backend/src/main/java/` for Java. Also restore your native inference files in `mobile/android/app/src/main/kotlin/`, database migrations, tests and custom scripts as needed. Keep the configuration in this template rather than copying private configuration from the original project.
+## Included
+- Camera/gallery, image validation, on-device LiteRT detection and confidence/box display.
+- GPS, tourist-spot matching, description/severity, image upload and saved reports.
+- Registration/login, JWT, BCrypt, private images and ownership checks.
+- Tourist report history, admin verification/assignment, department cleanup evidence.
+- Admin department/tourist-spot management, maps and report summaries.
+- Database migrations, bundled model, source tests and local setup scripts.
 
-Use your existing installed Flutter, Android Studio, Java and Docker; nothing was installed. Dependency caches, generated build files, local SDK paths, Git history, database exports, uploaded reports and private credential files were excluded. Tools may regenerate local files/download project dependencies when you eventually run the project.
+The bundled Android model has five classes: glass, metal, paper, plastic and trash
+(displayed as miscellaneous; stored using the Other category). No model is trained here.
 
-The local database is separately named `chitwan_care_template`, exposed on port 54330, with a separate Compose volume. Backend port is 8082. Configure a new local DB_PASSWORD and JWT_SECRET before running. When restoring app API configuration, point it at this backend rather than the original/hosted backend (Android emulator: http://10.0.2.2:8082). Do not reuse the original database URL or hosted credentials.
+## Run on this laptop
 
-The original Desktop/chitwan-care folder was not changed. No Git repository was initialized, no builds/tests were run, and no database was started.
+Prerequisites: Docker Desktop running, Java 21 or newer supported by the backend,
+your installed Flutter SDK, and Android Studio with an emulator or USB debugging.
+
+In Terminal, from this repository:
+
+```sh
+cd /Users/prabinpoudel/Desktop/chitwan-care-template
+sh scripts/start-local.sh
+```
+
+Keep that terminal open. The script creates ignored local credentials when absent,
+starts the separate PostgreSQL container, creates a private JWT secret and starts
+Spring Boot at http://127.0.0.1:8082. Existing credentials and database volume are
+preserved. Wait for the backend's Started message.
+
+In a second Terminal, start an emulator or connect an unlocked Android phone with
+USB debugging enabled, approve its USB debugging prompt, then run:
+
+```sh
+cd /Users/prabinpoudel/Desktop/chitwan-care-template
+sh scripts/run-android.sh
+```
+
+If multiple devices are connected, specify the serial shown by the script:
+
+```sh
+sh scripts/run-android.sh emulator-5554
+sh scripts/run-android.sh YOUR_PHONE_SERIAL
+```
+
+The launcher sets up `adb reverse tcp:8082 tcp:8082` and configures Flutter to use
+`http://127.0.0.1:8082`. Run it again after reconnecting the cable or restarting the
+emulator. No public host, LAN address or hosted server is required. USB must remain
+connected for phone-to-backend access.
+
+In Android Studio open this repository's **mobile** directory. The **Chitwan Backend**
+run configuration starts the same local setup script. For Flutter's green Run button:
+an emulator can use the default `http://10.0.2.2:8082`; a USB phone needs the reverse
+command and `--dart-define=API_BASE_URL=http://127.0.0.1:8082` in additional run args.
+Use Debug mode for local HTTP. The command-line launcher handles both automatically.
+
+If Flutter is not found, set `FLUTTER_SDK` to your SDK directory. The wrapper also
+recognizes the existing SDK at `$HOME/Documents/Codex/2026-09-20/w/work/flutter-sdk`.
+
+## Fresh database and roles
+
+This copy does not include your original accounts, reports, uploaded photos or SQL
+export. Register a new account in the app. To make your own registered account an admin:
+
+```sh
+sh backend/scripts/set-test-role.sh YOUR_REGISTERED_EMAIL ADMIN
+```
+
+Log out and log in again. In Admin Management create a department. Register another
+account, then link it to the department using its database ID:
+
+```sh
+sh backend/scripts/set-test-role.sh DEPARTMENT_EMAIL DEPARTMENT DEPARTMENT_ID
+```
+
+These scripts modify only this template's Docker database. Accounts are not public
+self-service admin registrations. Assignment is manual.
+
+## Local configuration
+
+| Setting | Value / purpose |
+|---|---|
+| Backend | 127.0.0.1:8082 |
+| PostgreSQL | 127.0.0.1:54330 / chitwan_care_template |
+| DB credentials | ignored root .env; generated by start-local.sh |
+| JWT secret | ignored backend/auth-local.properties; generated locally |
+| Images | backend/uploads, ignored |
+| ANALYSIS_MODE | device (default), mock, or api |
+| API_BASE_URL | emulator default http://10.0.2.2:8082; USB launcher uses localhost |
+
+The source mock/API adapters remain selectable for development. API analysis currently
+uses the Spring mock; device mode runs the bundled model. Mock results are labelled.
+Browser preview is optional and uses mock mode; Android is the actual target.
+
+## Code placement
+- Flutter: app composition in lib/app; shared photo/config/widgets in lib/core;
+  feature screens/controllers/repositories/services under lib/features.
+- Authentication transport and secure persistence: auth_repository.dart.
+- Shared authenticated HTTP provider: lib/app/authenticated_http.dart.
+- Spring: controllers, services, repositories, entities, dto, storage and config.
+- Flyway SQL: backend/src/main/resources/db/migration.
+- Android model bridge: mobile/android/app/src/main/kotlin.
+
+## Limits and verification
+
+No builds, tests or device runs were performed for this restoration, at the user's
+request. Source and configuration were reviewed; working behavior still requires a
+manual run. Historical phase documents describe the original project and may contain
+old ports or older model details; this README describes this template.
+
+Inference works locally. Login/report operations need the laptop backend and Docker.
+Map tiles and external map links still need internet; this is not a fully offline app.
+Dependencies/container images may need internet on first setup. iOS real inference,
+push notifications, automatic routing and production signing are not included.
+Category corrections preserving original predictions and fully manual incident
+coordinates remain future work. No claim is made that all original wishlist features
+are complete.
+
+## Submission
+
+Push this source repository, including the model and migrations. Do not add .env,
+auth-local.properties, uploads, database dumps, SDK paths or build caches.
+The run instructions above are reproducible setup instructions for the recipient.

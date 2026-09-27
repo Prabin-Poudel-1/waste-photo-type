@@ -4,9 +4,9 @@ import java.time.Instant;
 import np.chitwancare.enums.ImageType;
 
 public record ReportImageResponse(
-        Long id,
-        ImageType imageType,
-        String originalFilename,
-        String contentType,
-        Instant createdAt,
-        String url) {}// Placeholder: paste the contents of backend/src/main/java/np/chitwancare/dto/ReportImageResponse.java from your app here.
+    Long id,
+    ImageType imageType,
+    String originalFilename,
+    String contentType,
+    Instant createdAt,
+    String url) {}

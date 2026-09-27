@@ -1,244 +1,283 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../auth/auth_controller.dart';
-import '../location_intelligence/analytics_panel.dart';
-import '../location_intelligence/insights_repository.dart';
-import '../location_intelligence/waste_map_screen.dart';
-import '../management/management_screen.dart';
-import '../reports/screens/my_reports_screen.dart';
+import '../../../app/theme.dart';
+import '../../../core/widgets/shared.dart';
+import '../../analysis/controllers/analysis_controller.dart';
+import '../../auth/auth_controller.dart';
+import '../../reports/screens/my_reports_screen.dart';
 
-class AuthorityHomeScreen
-    extends ConsumerStatefulWidget {
-  const AuthorityHomeScreen({super.key});
-
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
   @override
-  ConsumerState<AuthorityHomeScreen>
-  createState() {
-    return _AuthorityHomeScreenState();
-  }
-}
-
-class _AuthorityHomeScreenState
-    extends ConsumerState<AuthorityHomeScreen> {
-  Map<String, int>? counts;
-  Insights? insights;
-  bool loading = true;
-  String? error;
-
-  @override
-  void initState() {
-    super.initState();
-    refresh();
-  }
-
-  Future<void> refresh() async {
-    setState(() {
-      loading = true;
-      error = null;
-    });
-
-    try {
-      final result = await ref
-          .read(insightsRepositoryProvider)
-          .summary();
-
-      if (mounted) {
-        setState(() {
-          insights = result;
-          counts = result.overview;
-        });
-      }
-    } catch (caught) {
-      if (mounted) {
-        setState(() {
-          error = caught.toString();
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          loading = false;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final auth = ref.watch(authProvider);
-    final admin = auth.role == 'ADMIN';
-
-    final cards = admin
-        ? {
-      'Total Reports': 'total',
-      'Active': 'active',
-      'In Progress': 'inProgress',
-      'Resolved': 'resolved',
-    }
-        : {
-      'Assigned Reports': 'total',
-      'In Progress': 'inProgress',
-      'Resolved': 'resolved',
-    };
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          admin
-              ? 'Admin Dashboard'
-              : 'Department Dashboard',
+  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
+    appBar: AppBar(
+      title: Text('Hello, ${ref.watch(authProvider).name ?? 'traveller'}'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const MyReportsScreen()),
+          ),
+          child: const Text('My Reports'),
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Refresh counts',
-            onPressed: loading ? null : refresh,
-            icon: const Icon(Icons.refresh),
-          ),
-          IconButton(
-            tooltip: 'Log out',
-            onPressed: () => ref
-                .read(authProvider.notifier)
-                .logout(),
-            icon: const Icon(Icons.logout),
-          ),
-        ],
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints:
-          const BoxConstraints(maxWidth: 640),
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              Text(
-                'Welcome, '
-                    '${auth.name ?? 'Authority'}',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall,
+        IconButton(
+          tooltip: 'Log out',
+          icon: const Icon(Icons.logout),
+          onPressed: () => ref.read(authProvider.notifier).logout(),
+        ),
+      ],
+    ),
+    body: SafeArea(
+      child: PageShell(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(24, 22, 24, 28),
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(11),
+                  decoration: BoxDecoration(
+                    color: forest,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.eco_outlined, color: leaf),
+                ),
+                const SizedBox(width: 11),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'chitwan care',
+                        style: TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
+                          color: forest,
+                          letterSpacing: -.5,
+                        ),
+                      ),
+                      Text(
+                        'SMALL ACTS. BETTER JOURNEYS.',
+                        style: TextStyle(
+                          fontSize: 8,
+                          letterSpacing: 1.2,
+                          color: muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.landscape_outlined, color: forest),
+              ],
+            ),
+            const SizedBox(height: 32),
+            const Row(
+              children: [
+                Icon(Icons.location_on_outlined, size: 16, color: forest),
+                SizedBox(width: 5),
+                Eyebrow('BHARATPUR · CHITWAN'),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Leave a place\nbetter than\nyou found it.',
+              style: Theme.of(context).textTheme.headlineLarge,
+            ),
+            const SizedBox(height: 14),
+            const Text(
+              'Help care for the rivers, trails and cultural places that make every visit special.',
+            ),
+            const SizedBox(height: 24),
+            Container(
+              height: 184,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: const Color(0xFFDBE7CF),
+                borderRadius: BorderRadius.circular(25),
               ),
-              const SizedBox(height: 12),
-              Text(
-                admin
-                    ? 'Review and assign waste reports from tourist destinations.'
-                    : 'Manage reports assigned to your department.',
+              child: Stack(
+                children: [
+                  const Positioned.fill(
+                    child: CustomPaint(painter: LandscapePainter()),
+                  ),
+                  Positioned(
+                    left: 18,
+                    top: 17,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: .8),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: const Text(
+                        'OUR PLACES. OUR RESPONSIBILITY.',
+                        style: TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                          color: forest,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Positioned(
+                    left: 20,
+                    bottom: 18,
+                    child: Text(
+                      'A cleaner welcome.',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              if (loading)
-                const LinearProgressIndicator(),
-              if (error != null) ...[
-                Text(error!),
-                TextButton(
-                  onPressed: refresh,
-                  child: const Text('Retry'),
+            ),
+            const SizedBox(height: 22),
+            FilledButton.icon(
+              onPressed: () => ref.read(analysisProvider.notifier).start(),
+              icon: const Icon(Icons.add_a_photo_outlined),
+              label: const Text('Report Waste'),
+            ),
+            const SizedBox(height: 10),
+            const Center(
+              child: Text(
+                'Take a photo. Make a difference.',
+                style: TextStyle(fontSize: 12, color: muted),
+              ),
+            ),
+            const SizedBox(height: 29),
+            const Text(
+              'A simple act of care',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: forest,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _Step(
+                    Icons.camera_alt_outlined,
+                    'Capture',
+                    'Spot waste on your visit',
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: _Step(
+                    Icons.auto_awesome_outlined,
+                    'Review',
+                    'Check suggested categories',
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: _Step(
+                    Icons.fact_check_outlined,
+                    'Prepare',
+                    'Preview your report draft',
+                  ),
                 ),
               ],
-              if (!loading &&
-                  error == null &&
-                  counts != null)
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    for (final card
-                    in cards.entries)
-                      SizedBox(
-                        width: 160,
-                        child: Card(
-                          child: Padding(
-                            padding:
-                            const EdgeInsets
-                                .all(20),
-                            child: Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment
-                                  .start,
-                              children: [
-                                Text(
-                                  '${counts![card.value] ?? 0}',
-                                  style: Theme.of(
-                                    context,
-                                  )
-                                      .textTheme
-                                      .headlineMedium,
-                                ),
-                                Text(card.key),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                icon: const Icon(
-                  Icons.map_outlined,
-                ),
-                label: Text(
-                  admin
-                      ? 'View Waste Map'
-                      : 'View Assigned Map',
-                ),
-                onPressed: () =>
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) =>
-                        const WasteMapScreen(),
-                      ),
-                    ),
+            ),
+            const SizedBox(height: 24),
+            const Notice(
+              'On-device waste detection · Your photo and GPS are uploaded only when you submit a report.',
+            ),
+            const SizedBox(height: 16),
+            const Center(
+              child: Text(
+                'For visitors. For communities. For Chitwan.',
+                style: TextStyle(fontSize: 11, color: muted),
               ),
-              if (admin)
-                OutlinedButton.icon(
-                  icon: const Icon(
-                    Icons.settings_outlined,
-                  ),
-                  label: const Text(
-                    'Management',
-                  ),
-                  onPressed: () =>
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                          const ManagementScreen(),
-                        ),
-                      ),
-                ),
-              if (admin &&
-                  !loading &&
-                  error == null &&
-                  insights != null)
-                AnalyticsPanel(insights!),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                icon: const Icon(
-                  Icons.receipt_long,
-                ),
-                label: Text(
-                  admin
-                      ? 'View Reports'
-                      : 'View Assigned Reports',
-                ),
-                onPressed: () async {
-                  await Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) =>
-                      const MyReportsScreen(
-                        authority: true,
-                      ),
-                    ),
-                  );
-
-                  if (mounted) {
-                    await refresh();
-                  }
-                },
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    ),
+  );
+}
+
+class _Step extends StatelessWidget {
+  final IconData icon;
+  final String title, caption;
+  const _Step(this.icon, this.title, this.caption);
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Icon(icon, color: forest, size: 23),
+      const SizedBox(height: 9),
+      Text(
+        title,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+          color: forest,
+        ),
+      ),
+      const SizedBox(height: 4),
+      Text(
+        caption,
+        style: const TextStyle(fontSize: 11, height: 1.5, color: muted),
+      ),
+    ],
+  );
+}
+
+class LandscapePainter extends CustomPainter {
+  const LandscapePainter();
+  @override
+  void paint(Canvas canvas, Size s) {
+    canvas.drawCircle(
+      Offset(s.width * .8, 45),
+      26,
+      Paint()..color = const Color(0xFFF4D99A),
     );
+    final back = Path()
+      ..moveTo(0, s.height * .65)
+      ..quadraticBezierTo(s.width * .24, 25, s.width * .53, 95)
+      ..quadraticBezierTo(s.width * .77, 30, s.width, 70)
+      ..lineTo(s.width, s.height)
+      ..lineTo(0, s.height)
+      ..close();
+    canvas.drawPath(back, Paint()..color = const Color(0xFF91AE83));
+    final river = Path()
+      ..moveTo(s.width * .52, 90)
+      ..quadraticBezierTo(s.width * .27, 130, s.width * .77, s.height)
+      ..lineTo(s.width * .45, s.height)
+      ..quadraticBezierTo(s.width * .05, 130, s.width * .52, 90);
+    canvas.drawPath(river, Paint()..color = const Color(0xFFA6CCBB));
+    final front = Path()
+      ..moveTo(0, 115)
+      ..quadraticBezierTo(s.width * .18, 105, s.width * .42, s.height)
+      ..lineTo(0, s.height)
+      ..close();
+    canvas.drawPath(front, Paint()..color = forest);
+    for (final x in [s.width * .08, s.width * .16, s.width * .91]) {
+      canvas.drawLine(
+        Offset(x, 120),
+        Offset(x, 74),
+        Paint()
+          ..color = forest
+          ..strokeWidth = 3,
+      );
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(x, 73), width: 28, height: 49),
+        Paint()..color = const Color(0xFF3C6C50),
+      );
+    }
   }
-}// Placeholder: paste the contents of mobile/lib/features/home/screens/home_screen.dart from your app here.
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}

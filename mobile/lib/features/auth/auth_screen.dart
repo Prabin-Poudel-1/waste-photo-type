@@ -8,23 +8,16 @@ import 'auth_controller.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
-
   @override
-  ConsumerState<AuthScreen> createState() =>
-      _AuthScreenState();
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState
-    extends ConsumerState<AuthScreen> {
+class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _form = GlobalKey<FormState>();
-
-  final _name = TextEditingController();
-  final _email = TextEditingController();
-  final _password = TextEditingController();
-
-  bool _register = false;
-  bool _obscure = true;
-
+  final _name = TextEditingController(),
+      _email = TextEditingController(),
+      _password = TextEditingController();
+  bool _register = false, _obscure = true;
   @override
   void dispose() {
     _name.dispose();
@@ -36,11 +29,8 @@ class _AuthScreenState
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chitwan Care'),
-      ),
+      appBar: AppBar(title: const Text('Chitwan Care')),
       body: SafeArea(
         child: PageShell(
           child: Form(
@@ -49,17 +39,11 @@ class _AuthScreenState
               padding: const EdgeInsets.all(28),
               children: [
                 const SizedBox(height: 30),
-                const Eyebrow(
-                  'BHARATPUR · CHITWAN',
-                ),
+                const Eyebrow('BHARATPUR · CHITWAN'),
                 const SizedBox(height: 16),
                 Text(
-                  _register
-                      ? 'Create your account'
-                      : 'Welcome back',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium,
+                  _register ? 'Create your account' : 'Welcome back',
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 12),
                 const Text(
@@ -71,35 +55,22 @@ class _AuthScreenState
                     controller: _name,
                     enabled: !auth.busy,
                     maxLength: 120,
-                    textCapitalization:
-                    TextCapitalization.words,
-                    autofillHints: const [
-                      AutofillHints.name,
-                    ],
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
-                    ),
-                    validator: (value) =>
-                    (value?.trim().isEmpty ?? true)
-                        ? 'Enter your name.'
-                        : null,
+                    textCapitalization: TextCapitalization.words,
+                    autofillHints: const [AutofillHints.name],
+                    decoration: const InputDecoration(labelText: 'Name'),
+                    validator: (v) =>
+                        (v?.trim().isEmpty ?? true) ? 'Enter your name.' : null,
                   ),
                 TextFormField(
                   controller: _email,
                   enabled: !auth.busy,
-                  keyboardType:
-                  TextInputType.emailAddress,
-                  autofillHints: const [
-                    AutofillHints.email,
-                  ],
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                  ),
-                  validator: (value) =>
-                  value == null ||
-                      !RegExp(
-                        r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-                      ).hasMatch(value.trim())
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  validator: (v) =>
+                      v == null ||
+                          !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+                              .hasMatch(v.trim())
                       ? 'Enter a valid email.'
                       : null,
                 ),
@@ -119,69 +90,50 @@ class _AuthScreenState
                         ? 'At least 8 characters; at most 72 UTF-8 bytes.'
                         : null,
                     suffixIcon: IconButton(
-                      tooltip: _obscure
-                          ? 'Show password'
-                          : 'Hide password',
-                      onPressed: () => setState(
-                            () => _obscure = !_obscure,
-                      ),
+                      tooltip: _obscure ? 'Show password' : 'Hide password',
+                      onPressed: () => setState(() => _obscure = !_obscure),
                       icon: Icon(
-                        _obscure
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                        _obscure ? Icons.visibility : Icons.visibility_off,
                       ),
                     ),
                   ),
-                  validator: (value) =>
-                  value == null ||
-                      value.isEmpty ||
-                      (_register &&
-                          value.length < 8) ||
-                      utf8.encode(value).length > 72
+                  validator: (v) =>
+                      v == null ||
+                          v.isEmpty ||
+                          (_register && v.length < 8) ||
+                          utf8.encode(v).length > 72
                       ? 'Enter a valid password.'
                       : null,
                 ),
                 const SizedBox(height: 20),
-                if (auth.error != null)
-                  Notice(
-                    auth.error!,
-                    warning: true,
-                  ),
-                if (auth.busy)
-                  const LinearProgressIndicator(),
+                if (auth.error != null) Notice(auth.error!, warning: true),
+                if (auth.busy) const LinearProgressIndicator(),
                 const SizedBox(height: 18),
                 FilledButton(
                   onPressed: auth.busy
                       ? null
                       : () {
-                    if (_form.currentState!
-                        .validate()) {
-                      ref
-                          .read(
-                        authProvider.notifier,
-                      )
-                          .authenticate(
-                        register: _register,
-                        email: _email.text,
-                        password: _password.text,
-                        name: _name.text,
-                      );
-                    }
-                  },
-                  child: Text(
-                    _register
-                        ? 'Register'
-                        : 'Log in',
-                  ),
+                          if (_form.currentState!.validate()) {
+                            ref
+                                .read(authProvider.notifier)
+                                .authenticate(
+                                  register: _register,
+                                  email: _email.text,
+                                  password: _password.text,
+                                  name: _name.text,
+                                );
+                          }
+                        },
+                  child: Text(_register ? 'Register' : 'Log in'),
                 ),
                 TextButton(
                   onPressed: auth.busy
                       ? null
                       : () => setState(() {
-                    _register = !_register;
-                    _password.clear();
-                    _form.currentState?.reset();
-                  }),
+                          _register = !_register;
+                          _password.clear();
+                          _form.currentState?.reset();
+                        }),
                   child: Text(
                     _register
                         ? 'Already registered? Log in'
@@ -195,4 +147,4 @@ class _AuthScreenState
       ),
     );
   }
-}// Placeholder: paste the contents of mobile/lib/features/auth/auth_screen.dart from your app here.
+}

@@ -1,63 +1,38 @@
-// Placeholder: paste the contents of mobile/lib/features/reports/controllers/report_controller.dart from your app here.
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../auth/auth_controller.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../analysis/models/detection_result.dart';
-import '../../auth/auth_controller.dart';
 import '../models/report_models.dart';
 import '../repositories/report_repository.dart';
 import '../services/location_service.dart';
 
-final reportRepositoryProvider =
-Provider<ReportRepository>((ref) {
-  return HttpReportRepository(
-    ref.watch(authenticatedDioProvider),
-  );
+final reportRepositoryProvider = Provider<ReportRepository>((ref) {
+  return HttpReportRepository(ref.watch(authenticatedDioProvider));
 });
-
-final locationServiceProvider =
-Provider<LocationService>(
-      (ref) => DeviceLocationService(),
+final locationServiceProvider = Provider<LocationService>(
+  (ref) => DeviceLocationService(),
 );
 
 class ReportController extends ChangeNotifier {
   final ReportRepository repository;
   final LocationService locations;
-
-  ReportController(
-      this.repository,
-      this.locations,
-      );
-
+  ReportController(this.repository, this.locations);
   List<WasteCategory> categories = [];
   List<TouristSpot> spots = [];
-
   IncidentLocation? location;
   TouristSpot? selectedSpot;
-
-  bool loading = false;
-  bool locating = false;
-  bool matching = false;
-  bool submitting = false;
-  bool catalogReady = false;
-  bool matchReady = false;
+  bool loading = false, locating = false, matching = false, submitting = false;
+  bool catalogReady = false, matchReady = false;
   bool manualSpot = false;
-
-  String? catalogError;
-  String? matchError;
-  String? submitError;
-
+  String? catalogError, matchError, submitError;
   LocationFailure? locationError;
   SubmittedReport? submitted;
   double? progress;
-
   bool _disposed = false;
-
   void _notify() {
-    if (!_disposed) {
-      notifyListeners();
-    }
+    if (!_disposed) notifyListeners();
   }
 
   @override
@@ -67,39 +42,27 @@ class ReportController extends ChangeNotifier {
   }
 
   Future<void> loadCatalog() async {
-    if (loading || submitting) {
-      return;
-    }
-
+    if (loading || submitting) return;
     loading = true;
     catalogReady = false;
     catalogError = null;
     _notify();
-
     try {
       categories = await repository.categories();
       spots = await repository.spots();
-
       if (categories.isEmpty) {
         throw const AppFailure(
           'No active waste categories are available. Please contact the project team.',
         );
       }
-
-      if (selectedSpot != null &&
-          !spots.any(
-                (spot) =>
-            spot.id == selectedSpot!.id,
-          )) {
+      if (selectedSpot != null && !spots.any((s) => s.id == selectedSpot!.id)) {
         selectedSpot = null;
       }
-
       catalogReady = true;
-    } on AppFailure catch (error) {
-      catalogError = error.message;
+    } on AppFailure catch (e) {
+      catalogError = e.message;
     } catch (_) {
-      catalogError =
-      'Could not load report options. Please retry.';
+      catalogError = 'Could not load report options. Please retry.';
     } finally {
       loading = false;
       _notify();
@@ -107,10 +70,7 @@ class ReportController extends ChangeNotifier {
   }
 
   Future<void> locate() async {
-    if (locating || submitting || matching) {
-      return;
-    }
-
+    if (locating || submitting || matching) return;
     locating = true;
     location = null;
     selectedSpot = null;
@@ -119,23 +79,15 @@ class ReportController extends ChangeNotifier {
     locationError = null;
     matchError = null;
     _notify();
-
     try {
       final value = await locations.locate();
-
       if (!value.valid) {
-        throw const LocationFailure(
-          'Invalid GPS coordinates. Retry location.',
-        );
+        throw const LocationFailure('Invalid GPS coordinates. Retry location.');
       }
-
-      if (_disposed) {
-        return;
-      }
-
+      if (_disposed) return;
       location = value;
-    } on LocationFailure catch (error) {
-      locationError = error;
+    } on LocationFailure catch (e) {
+      locationError = e;
     } catch (_) {
       locationError = const LocationFailure(
         'Location unavailable. Please retry.',
@@ -144,47 +96,27 @@ class ReportController extends ChangeNotifier {
       locating = false;
       _notify();
     }
-
-    if (!_disposed && location != null) {
-      await match();
-    }
+    if (!_disposed && location != null) await match();
   }
 
   Future<void> match() async {
-    if (location == null ||
-        matching ||
-        submitting) {
-      return;
-    }
-
+    if (location == null || matching || submitting) return;
     matching = true;
     manualSpot = false;
     matchError = null;
     matchReady = false;
     _notify();
-
     try {
-      selectedSpot = await repository.nearest(
-        location!,
-      );
-
-      if (selectedSpot != null &&
-          !spots.any(
-                (spot) =>
-            spot.id == selectedSpot!.id,
-          )) {
-        spots = [
-          ...spots,
-          selectedSpot!,
-        ];
+      selectedSpot = await repository.nearest(location!);
+      if (selectedSpot != null && !spots.any((s) => s.id == selectedSpot!.id)) {
+        spots = [...spots, selectedSpot!];
       }
-
       matchReady = true;
-    } on AppFailure catch (error) {
-      matchError = error.message;
+    } on AppFailure catch (e) {
+      matchError = e.message;
     } catch (_) {
       matchError =
-      'Could not match a tourist spot. Retry or select one manually.';
+          'Could not match a tourist spot. Retry or select one manually.';
     } finally {
       matching = false;
       _notify();
@@ -192,16 +124,8 @@ class ReportController extends ChangeNotifier {
   }
 
   void selectSpot(int? id) {
-    if (submitting || matching) {
-      return;
-    }
-
-    selectedSpot = id == null
-        ? null
-        : spots.firstWhere(
-          (spot) => spot.id == id,
-    );
-
+    if (submitting || matching) return;
+    selectedSpot = id == null ? null : spots.firstWhere((s) => s.id == id);
     manualSpot = true;
     matchReady = true;
     matchError = null;
@@ -210,29 +134,25 @@ class ReportController extends ChangeNotifier {
 
   bool get canSubmit =>
       catalogReady &&
-          location != null &&
-          matchReady &&
-          !loading &&
-          !locating &&
-          !matching &&
-          !submitting &&
-          submitted == null;
+      location != null &&
+      matchReady &&
+      !loading &&
+      !locating &&
+      !matching &&
+      !submitting &&
+      submitted == null;
 
   Future<void> submit(
-      WastePhoto photo,
-      List<WasteDetection> detections,
-      String description,
-      String severity,
-      ) async {
-    if (!canSubmit) {
-      return;
-    }
-
+    WastePhoto photo,
+    List<WasteDetection> detections,
+    String description,
+    String severity,
+  ) async {
+    if (!canSubmit) return;
     submitting = true;
     submitError = null;
     progress = null;
     _notify();
-
     try {
       final metadata = reportMetadata(
         location: location!,
@@ -242,22 +162,15 @@ class ReportController extends ChangeNotifier {
         severity: severity,
         touristSpotId: selectedSpot?.id,
       );
-
-      submitted = await repository.submit(
-        metadata,
-        photo,
-            (sent, total) {
-          progress = total > 0
-              ? sent / total
-              : null;
-          _notify();
-        },
-      );
-    } on AppFailure catch (error) {
-      submitError = error.message;
+      submitted = await repository.submit(metadata, photo, (sent, total) {
+        progress = total > 0 ? sent / total : null;
+        _notify();
+      });
+    } on AppFailure catch (e) {
+      submitError = e.message;
     } catch (_) {
       submitError =
-      'Could not complete submission. Your photo has been kept for retry.';
+          'Could not complete submission. Your photo has been kept for retry.';
     } finally {
       submitting = false;
       _notify();

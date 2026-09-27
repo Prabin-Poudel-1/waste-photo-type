@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
-import '../../features/analysis/models/detection_result.dart';
+import '../models/waste_photo.dart';
 
 class PageShell extends StatelessWidget {
   final Widget child;
-
-  const PageShell({
-    super.key,
-    required this.child,
-  });
-
+  const PageShell({super.key, required this.child});
   @override
   Widget build(BuildContext context) => Center(
     child: ConstrainedBox(
@@ -22,12 +17,7 @@ class PageShell extends StatelessWidget {
 
 class Eyebrow extends StatelessWidget {
   final String text;
-
-  const Eyebrow(
-      this.text, {
-        super.key,
-      });
-
+  const Eyebrow(this.text, {super.key});
   @override
   Widget build(BuildContext context) => Text(
     text,
@@ -43,29 +33,19 @@ class Eyebrow extends StatelessWidget {
 class Notice extends StatelessWidget {
   final String text;
   final bool warning;
-
-  const Notice(
-      this.text, {
-        super.key,
-        this.warning = false,
-      });
-
+  const Notice(this.text, {super.key, this.warning = false});
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: warning
-          ? const Color(0xFFFFEEDC)
-          : const Color(0xFFE9F0DE),
+      color: warning ? const Color(0xFFFFEEDC) : const Color(0xFFE9F0DE),
       borderRadius: BorderRadius.circular(14),
     ),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
-          warning
-              ? Icons.info_outline
-              : Icons.science_outlined,
+          warning ? Icons.info_outline : Icons.science_outlined,
           size: 19,
           color: forest,
         ),
@@ -73,11 +53,7 @@ class Notice extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
-              fontSize: 12,
-              height: 1.5,
-              color: forest,
-            ),
+            style: const TextStyle(fontSize: 12, height: 1.5, color: forest),
           ),
         ),
       ],
@@ -88,13 +64,7 @@ class Notice extends StatelessWidget {
 class PhotoPreview extends StatelessWidget {
   final WastePhoto photo;
   final double height;
-
-  const PhotoPreview(
-      this.photo, {
-        super.key,
-        this.height = 250,
-      });
-
+  const PhotoPreview(this.photo, {super.key, this.height = 250});
   @override
   Widget build(BuildContext context) => ClipRRect(
     borderRadius: BorderRadius.circular(22),
@@ -118,17 +88,12 @@ class PhotoPreview extends StatelessWidget {
 
 class StepHeader extends StatelessWidget {
   final int current;
-
-  const StepHeader(
-      this.current, {
-        super.key,
-      });
-
+  const StepHeader(this.current, {super.key});
   @override
   Widget build(BuildContext context) => Row(
     children: List.generate(
       3,
-          (i) => Expanded(
+      (i) => Expanded(
         child: Padding(
           padding: const EdgeInsets.only(right: 6),
           child: Column(
@@ -143,11 +108,7 @@ class StepHeader extends StatelessWidget {
               ),
               const SizedBox(height: 9),
               Text(
-                [
-                  '01  PHOTO',
-                  '02  ANALYSIS',
-                  '03  REVIEW',
-                ][i],
+                ['01  PHOTO', '02  ANALYSIS', '03  REVIEW'][i],
                 style: TextStyle(
                   fontSize: 9,
                   letterSpacing: .7,
@@ -161,4 +122,4 @@ class StepHeader extends StatelessWidget {
       ),
     ),
   );
-}// Placeholder: paste the contents of mobile/lib/core/widgets/shared.dart from your app here.
+}

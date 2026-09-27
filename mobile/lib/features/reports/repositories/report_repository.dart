@@ -9,56 +9,41 @@ import '../models/report_models.dart';
 
 abstract interface class ReportRepository {
   Future<List<WasteCategory>> categories();
-
   Future<List<TouristSpot>> spots();
-
-  Future<TouristSpot?> nearest(
-      IncidentLocation location,
-      );
-
+  Future<TouristSpot?> nearest(IncidentLocation location);
   Future<SubmittedReport> submit(
-      Map<String, dynamic> metadata,
-      WastePhoto photo,
-      void Function(int, int) onProgress,
-      );
+    Map<String, dynamic> metadata,
+    WastePhoto photo,
+    void Function(int, int) onProgress,
+  );
 }
 
-class HttpReportRepository
-    implements ReportRepository {
+class HttpReportRepository implements ReportRepository {
   final Dio dio;
-
   HttpReportRepository(this.dio);
 
-  Future<T> _request<T>(
-      Future<T> Function() action,
-      ) async {
+  Future<T> _request<T>(Future<T> Function() action) async {
     try {
       return await action();
     } on AppFailure {
       rethrow;
-    } on DioException catch (error) {
-      final status = error.response?.statusCode;
-
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
       if (status == 413) {
         throw const AppFailure(
           'The photo is too large. Choose a photo under 10 MB.',
         );
       }
-
-      if (status != null &&
-          status >= 400 &&
-          status < 500) {
+      if (status != null && status >= 400 && status < 500) {
         throw const AppFailure(
           'The server could not accept this report. Check the photo, categories and tourist spot, then retry.',
         );
       }
-
       if (status != null && status >= 500) {
         throw const AppFailure(
           'The server could not complete the request. Your photo is still here; please retry.',
         );
       }
-
       throw const AppFailure(
         'Cannot reach the server or the request timed out. Check your connection and backend. If submission had started, it may have reached the server; retrying could create another report.',
       );
@@ -70,141 +55,71 @@ class HttpReportRepository
   }
 
   @override
-  Future<List<WasteCategory>> categories() {
-    return _request(() async {
-      final response = await dio.get(
-        '/api/v1/waste-categories',
-      );
-
-      return (response.data as List)
-          .map(
-            (entry) => WasteCategory.fromJson(
-          Map<String, dynamic>.from(
-            entry as Map,
-          ),
-        ),
-      )
-          .toList();
-    });
-  }
-
+  Future<List<WasteCategory>> categories() => _request(() async {
+    final r = await dio.get('/api/v1/waste-categories');
+    return (r.data as List)
+        .map((e) => WasteCategory.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  });
   @override
-  Future<List<TouristSpot>> spots() {
-    return _request(() async {
-      final response = await dio.get(
-        '/api/v1/tourist-spots',
-      );
-
-      return (response.data as List)
-          .map(
-            (entry) => TouristSpot.fromJson(
-          Map<String, dynamic>.from(
-            entry as Map,
-          ),
-        ),
-      )
-          .toList();
-    });
-  }
-
+  Future<List<TouristSpot>> spots() => _request(() async {
+    final r = await dio.get('/api/v1/tourist-spots');
+    return (r.data as List)
+        .map((e) => TouristSpot.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  });
   @override
-  Future<TouristSpot?> nearest(
-      IncidentLocation location,
-      ) {
-    return _request(() async {
-      final response = await dio.get(
-        '/api/v1/tourist-spots/nearest',
-        queryParameters: {
-          'latitude': location.latitude,
-          'longitude': location.longitude,
-        },
-      );
+  Future<TouristSpot?> nearest(IncidentLocation location) => _request(() async {
+    final r = await dio.get(
+      '/api/v1/tourist-spots/nearest',
+      queryParameters: {
+        'latitude': location.latitude,
+        'longitude': location.longitude,
+      },
+    );
+    return r.statusCode == 204
+        ? null
+        : TouristSpot.fromJson(Map<String, dynamic>.from(r.data as Map));
+  });
 
-      return response.statusCode == 204
-          ? null
-          : TouristSpot.fromJson(
-        Map<String, dynamic>.from(
-          response.data as Map,
-        ),
-      );
-    });
-  }
-
-  static FormData multipart(
-      Map<String, dynamic> metadata,
-      WastePhoto photo,
-      ) {
-    final bytes = photo.bytes;
-
-    if (bytes.isEmpty ||
-        bytes.length > AppConfig.maxImageBytes) {
-      throw const AppFailure(
-        'Choose a non-empty photo under 10 MB.',
-      );
+  static FormData multipart(Map<String, dynamic> metadata, WastePhoto photo) {
+    final b = photo.bytes;
+    if (b.isEmpty || b.length > AppConfig.maxImageBytes) {
+      throw const AppFailure('Choose a non-empty photo under 10 MB.');
     }
-
     final png =
-        bytes.length >= 8 &&
-            bytes[0] == 137 &&
-            bytes[1] == 80 &&
-            bytes[2] == 78 &&
-            bytes[3] == 71;
-
-    final jpeg =
-        bytes.length >= 3 &&
-            bytes[0] == 255 &&
-            bytes[1] == 216 &&
-            bytes[2] == 255;
-
+        b.length >= 8 && b[0] == 137 && b[1] == 80 && b[2] == 78 && b[3] == 71;
+    final jpeg = b.length >= 3 && b[0] == 255 && b[1] == 216 && b[2] == 255;
     if (!png && !jpeg) {
-      throw const AppFailure(
-        'Please select a JPEG or PNG photo for upload.',
-      );
+      throw const AppFailure('Please select a JPEG or PNG photo for upload.');
     }
-
     return FormData.fromMap({
       'metadata': MultipartFile.fromString(
         jsonEncode(metadata),
-        contentType: DioMediaType(
-          'application',
-          'json',
-        ),
+        contentType: DioMediaType('application', 'json'),
       ),
       'image': MultipartFile.fromBytes(
-        bytes,
+        b,
         filename: photo.name,
-        contentType: DioMediaType(
-          'image',
-          png ? 'png' : 'jpeg',
-        ),
+        contentType: DioMediaType('image', png ? 'png' : 'jpeg'),
       ),
     });
   }
 
   @override
   Future<SubmittedReport> submit(
-      Map<String, dynamic> metadata,
-      WastePhoto photo,
-      void Function(int, int) onProgress,
-      ) {
-    return _request(() async {
-      final response = await dio.post(
-        '/api/v1/reports',
-        data: multipart(metadata, photo),
-        onSendProgress: onProgress,
-      );
-
-      if (response.statusCode != 201) {
-        throw const FormatException(
-          'Expected created report',
-        );
-      }
-
-      return SubmittedReport.fromJson(
-        Map<String, dynamic>.from(
-          response.data as Map,
-        ),
-      );
-    });
-  }
-}// Placeholder: paste the contents of mobile/lib/features/reports/repositories/report_repository.dart from your app here.
+    Map<String, dynamic> metadata,
+    WastePhoto photo,
+    void Function(int, int) onProgress,
+  ) => _request(() async {
+    final r = await dio.post(
+      '/api/v1/reports',
+      data: multipart(metadata, photo),
+      onSendProgress: onProgress,
+    );
+    if (r.statusCode != 201) {
+      throw const FormatException('Expected created report');
+    }
+    return SubmittedReport.fromJson(Map<String, dynamic>.from(r.data as Map));
+  });
+}

@@ -6,21 +6,12 @@ import java.io.InputStream;
 // Storage keys are opaque; implementations must validate content and prevent path traversal.
 // Local development implementation can later be replaced by object storage.
 public interface ImageStorage {
-    StoredImage store(
-            InputStream content,
-            String originalFilename,
-            String contentType,
-            long size)
-            throws IOException;
+  StoredImage store(InputStream content, String originalFilename, String contentType, long size)
+      throws IOException;
 
-    InputStream open(String storageKey)
-            throws IOException;
+  InputStream open(String storageKey) throws IOException;
 
-    void delete(String storageKey)
-            throws IOException;
+  void delete(String storageKey) throws IOException;
 
-    record StoredImage(
-            String storageKey,
-            String contentType,
-            long size) {}
-}// Placeholder: paste the contents of backend/src/main/java/np/chitwancare/storage/ImageStorage.java from your app here.
+  record StoredImage(String storageKey, String contentType, long size) {}
+}

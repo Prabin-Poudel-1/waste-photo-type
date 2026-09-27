@@ -1,4 +1,3 @@
-// Placeholder: paste the contents of mobile/lib/features/analysis/screens/result_screen.dart from your app here.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,13 +9,11 @@ import 'detection_preview.dart';
 
 class ResultScreen extends ConsumerWidget {
   const ResultScreen({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(analysisProvider);
     final result = state.result!;
     final controller = ref.read(analysisProvider.notifier);
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -26,28 +23,18 @@ class ResultScreen extends ConsumerWidget {
         ),
         title: const Text(
           'Detection results',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
         ),
       ),
       body: SafeArea(
         child: PageShell(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(
-              24,
-              12,
-              24,
-              28,
-            ),
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
             children: [
               const StepHeader(2),
               const SizedBox(height: 24),
               Eyebrow(
-                result.isMock
-                    ? 'DEMONSTRATION RESULT'
-                    : 'ANALYSIS COMPLETE',
+                result.isMock ? 'DEMONSTRATION RESULT' : 'ANALYSIS COMPLETE',
               ),
               const SizedBox(height: 12),
               Text(
@@ -66,14 +53,11 @@ class ResultScreen extends ConsumerWidget {
               if (result.previewBytes != null)
                 DetectionPreview(result)
               else
-                PhotoPreview(
-                  state.photo!,
-                  height: 180,
-                ),
+                PhotoPreview(state.photo!, height: 180),
               const SizedBox(height: 18),
               if (result.isMock)
                 const Notice(
-                  'These are mock results, not findings from your photo. The trained model will be integrated later.',
+                  'These are simulated results from development mode, not findings from your photo.',
                 ),
               const SizedBox(height: 22),
               if (result.wasteDetected) ...[
@@ -91,16 +75,12 @@ class ResultScreen extends ConsumerWidget {
                     ),
                     Text(
                       '${result.detections.length} found',
-                      style: const TextStyle(
-                        fontSize: 12,
-                      ),
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                ...result.detections.map(
-                      (detection) => DetectionCard(detection),
-                ),
+                ...result.detections.map((d) => DetectionCard(d)),
               ] else
                 Container(
                   padding: const EdgeInsets.all(24),
@@ -110,11 +90,7 @@ class ResultScreen extends ConsumerWidget {
                   ),
                   child: const Column(
                     children: [
-                      Icon(
-                        Icons.search_off_outlined,
-                        size: 42,
-                        color: forest,
-                      ),
+                      Icon(Icons.search_off_outlined, size: 42, color: forest),
                       SizedBox(height: 12),
                       Text(
                         'No waste detected in this photo',
@@ -138,16 +114,12 @@ class ResultScreen extends ConsumerWidget {
                     ? controller.continueToReport
                     : null,
                 icon: const Icon(Icons.arrow_forward),
-                label: const Text(
-                  'Continue to Report',
-                ),
+                label: const Text('Continue to Report'),
               ),
               const SizedBox(height: 10),
               OutlinedButton(
                 onPressed: controller.backToPhoto,
-                child: const Text(
-                  'Try another photo',
-                ),
+                child: const Text('Try another photo'),
               ),
               const SizedBox(height: 14),
               const Text(
@@ -165,17 +137,10 @@ class ResultScreen extends ConsumerWidget {
 
 class DetectionCard extends StatelessWidget {
   final WasteDetection detection;
-
-  const DetectionCard(
-      this.detection, {
-        super.key,
-      });
-
+  const DetectionCard(this.detection, {super.key});
   @override
   Widget build(BuildContext context) {
-    final percent =
-    (detection.confidence * 100).round();
-
+    final percent = (detection.confidence * 100).round();
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(17),
@@ -224,16 +189,13 @@ class DetectionCard extends StatelessWidget {
           ),
           const SizedBox(height: 13),
           Semantics(
-            label:
-            '${detection.label}: $percent percent confidence',
+            label: '${detection.label}: $percent percent confidence',
             child: LinearProgressIndicator(
               value: detection.confidence,
               minHeight: 5,
               borderRadius: BorderRadius.circular(4),
               backgroundColor: line,
-              color: detection.needsReview
-                  ? const Color(0xFFC18442)
-                  : forest,
+              color: detection.needsReview ? const Color(0xFFC18442) : forest,
             ),
           ),
           const SizedBox(height: 8),
@@ -243,9 +205,7 @@ class DetectionCard extends StatelessWidget {
                 : 'Model confidence · review before reporting',
             style: TextStyle(
               fontSize: 10,
-              color: detection.needsReview
-                  ? const Color(0xFF976025)
-                  : muted,
+              color: detection.needsReview ? const Color(0xFF976025) : muted,
             ),
           ),
         ],

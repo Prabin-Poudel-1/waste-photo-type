@@ -5,21 +5,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class HealthService {
-    private final JdbcTemplate jdbc;
+  private final JdbcTemplate jdbc;
 
-    public HealthService(JdbcTemplate jdbc) {
-        this.jdbc = jdbc;
-    }
+  public HealthService(JdbcTemplate jdbc) {
+    this.jdbc = jdbc;
+  }
 
-    public boolean databaseAvailable() {
-        try {
-            return Integer.valueOf(1)
-                    .equals(
-                            jdbc.queryForObject(
-                                    "SELECT 1",
-                                    Integer.class));
-        } catch (RuntimeException exception) {
-            return false;
-        }
+  public boolean databaseAvailable() {
+    try {
+      return Integer.valueOf(1).equals(jdbc.queryForObject("SELECT 1", Integer.class));
+    } catch (RuntimeException ex) {
+      return false;
     }
-}// Placeholder: paste the contents of backend/src/main/java/np/chitwancare/service/HealthService.java from your app here.
+  }
+}
