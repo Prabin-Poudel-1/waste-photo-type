@@ -68,7 +68,7 @@ void main() {
 
           expect(
             detection.box!.bottom,
-            inInclusiveRange(0, 180),
+             inInclusiveRange(0, 180),
           );
         }
       }
